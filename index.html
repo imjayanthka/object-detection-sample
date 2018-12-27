@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd"></script>
+
+    <canvas id="canvas" width="980" height="653"> </canvas>
+
+    <!-- <img id="img" src="./imgs/beatles.jpg" alt="" style="visibility: hidden" /> -->
+    <script>
+      window.onload = () => {
+        var canvas = document.getElementById("canvas");
+        var ctx = canvas.getContext("2d");
+
+        var img = new Image();
+        img.src = "./imgs/beatles.jpg";
+        img.id = "img";
+        img.onload = () => {
+          ctx.drawImage(img, 0, 0);
+        };
+      };
+      // Notice there is no 'import' statement. 'cocoSsd' and 'tf' is
+      // available on the index-page because of the script tag above.
+      let classColorMap = {};
+      const img = document.getElementById("canvas");
+      // Load the model.
+      cocoSsd.load().then(model => {
+        // detect objects in the image.
+        model.detect(img).then(predictions => {
+          console.log("Predictions: ", predictions);
+          predictions.forEach(element => {
+            const clr = selectColor(element.class);
+            console.log(clr);
+            drawRect(element.bbox, clr);
+          });
+        });
+      });
+
+      function getRandomColor() {
+        var letters = "0123456789ABCDEF";
+        var color = "#";
+        for (var i = 0; i < 6; i++) {
+          color += letters[Math.floor(Math.random() * 16)];
+        }
+        return color;
+      }
+      const selectColor = colorClass => {
+        if (!(colorClass in classColorMap)) {
+          const clr = getRandomColor();
+          classColorMap[colorClass] = clr;
+          return clr;
+        } else {
+          return classColorMap[colorClass];
+        }
+      };
+
+      const drawRect = (bbox, color) => {
+        var canvas = document.getElementById("canvas");
+        var ctx = canvas.getContext("2d");
+        ctx.beginPath();
+        ctx.rect(bbox[0], bbox[1], bbox[2], bbox[3]);
+        ctx.strokeStyle = color;
+        ctx.closePath();
+        ctx.stroke();
+      };
+    </script>
+  </body>
+</html>
